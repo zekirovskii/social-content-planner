@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useState } from "react";
 import { platformOptions, statusOptions } from "@/constants/postOptions";
 
@@ -116,9 +117,12 @@ export default function PostForm({ onSubmit }) {
 
       {form.imageUrl ? (
         <div className="mx-auto max-w-xl overflow-hidden rounded-xl border border-white/15 bg-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.35)] backdrop-blur-lg">
-          <img
+          <Image
             src={form.imageUrl}
             alt="Gönderi görseli"
+            width={800}
+            height={320}
+            sizes="100vw"
             className="h-40 w-full object-cover"
           />
         </div>

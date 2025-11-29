@@ -35,10 +35,6 @@ export default function Home() {
     });
   }, [posts, platformFilter, statusFilter, search]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [platformFilter, statusFilter, search]);
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const pageItems = useMemo(() => {
@@ -69,13 +65,19 @@ export default function Home() {
           <div className="mb-6 grid gap-3 md:grid-cols-3">
             <input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               placeholder="Başlık ya da brief içinde ara..."
               className="rounded-xl border border-white/15 bg-white/90 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-200 focus:ring-2 focus:ring-blue-200/60"
             />
             <select
               value={platformFilter}
-              onChange={(e) => setPlatformFilter(e.target.value)}
+              onChange={(e) => {
+                setPlatformFilter(e.target.value);
+                setPage(1);
+              }}
               className="rounded-xl border border-white/15 bg-white/90 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-200 focus:ring-2 focus:ring-blue-200/60"
             >
               <option value="all">Platform (tümü)</option>
@@ -87,7 +89,10 @@ export default function Home() {
             </select>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
               className="rounded-xl border border-white/15 bg-white/90 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-200 focus:ring-2 focus:ring-blue-200/60"
             >
               <option value="all">Durum (tümü)</option>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { platformOptions, statusOptions } from "@/constants/postOptions";
 import { formatDate } from "@/utils/date";
@@ -178,9 +179,12 @@ export default function PostCard({ post, onUpdate, onDelete }) {
           </div>
           {post.imageUrl ? (
             <div className="overflow-hidden rounded-lg border border-slate-200">
-              <img
+              <Image
                 src={post.imageUrl}
                 alt={post.title}
+                width={800}
+                height={800}
+                sizes="(max-width: 1280px) 50vw, 33vw"
                 className="aspect-square w-full max-h-[220px] object-cover"
               />
             </div>
