@@ -7,9 +7,15 @@ export async function GET() {
     const posts = await prisma.post.findMany({
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json(posts);
+
+    // MongoDB ObjectId'yi stringe çevirerek client için normalize et
+    const normalized = posts.map((post) => ({
+      ...post,
+      id: post.id.toString(),
+    }));
+
+    return NextResponse.json(normalized);
   } catch (error) {
-    console.error("[POSTS_GET]", error);
     return NextResponse.json(
       { message: "Failed to fetch posts" },
       { status: 500 }
@@ -41,9 +47,14 @@ export async function POST(request) {
       },
     });
 
-    return NextResponse.json(post, { status: 201 });
+    return NextResponse.json(
+      {
+        ...post,
+        id: post.id.toString(),
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("[POSTS_POST]", error);
     return NextResponse.json(
       { message: "Failed to create post" },
       { status: 500 }

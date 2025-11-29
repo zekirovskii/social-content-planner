@@ -1,20 +1,25 @@
 import { NextResponse } from "next/server";
+import { ObjectId } from "mongodb";
 import prisma from "@/lib/prisma";
 
-
-export async function GET(_request, { params }) {
+export async function GET(_request, context) {
   try {
+    const { id } = await context.params;
+    const objectId = new ObjectId(id);
+
     const post = await prisma.post.findUnique({
-      where: { id: params.id },
+      where: { id: objectId },
     });
 
     if (!post) {
       return NextResponse.json({ message: "Post not found" }, { status: 404 });
     }
 
-    return NextResponse.json(post);
+    return NextResponse.json({
+      ...post,
+      id: post.id.toString(),
+    });
   } catch (error) {
-    console.error("[POST_GET]", error);
     return NextResponse.json(
       { message: "Failed to fetch post" },
       { status: 500 }
@@ -22,56 +27,45 @@ export async function GET(_request, { params }) {
   }
 }
 
-export async function PUT(request, { params }) {
+export async function PUT(request, context) {
   try {
-    const data = await request.json();
-    const { title, platform, status, scheduledAt, description, imageUrl } =
-      data ?? {};
+    const body = await request.json();
+    const { id } = await context.params;
+    const objectId = new ObjectId(id);
 
-    if (!title || !platform || !status) {
-      return NextResponse.json(
-        { message: "title, platform and status are required" },
-        { status: 400 }
-      );
-    }
+    const data = {
+      ...body,
+      scheduledAt:
+        body.scheduledAt && body.scheduledAt.trim() !== ""
+          ? new Date(body.scheduledAt)
+          : null,
+    };
 
     const updated = await prisma.post.update({
-      where: { id: params.id },
-      data: {
-        title,
-        platform,
-        status,
-        description: description || null,
-        imageUrl: imageUrl || null,
-        scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-      },
+      where: { id: objectId },
+      data,
     });
 
-    return NextResponse.json(updated);
+    return NextResponse.json({
+      ...updated,
+      id: updated.id.toString(),
+    });
   } catch (error) {
-    console.error("[POST_PUT]", error);
-    if (error.code === "P2025") {
-      return NextResponse.json({ message: "Post not found" }, { status: 404 });
-    }
-    return NextResponse.json(
-      { message: "Failed to update post" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 }
 
-export async function DELETE(_request, { params }) {
+export async function DELETE(_request, context) {
   try {
-    await prisma.post.delete({ where: { id: params.id } });
-    return NextResponse.json({ message: "Deleted" });
+    const { id } = await context.params;
+    const objectId = new ObjectId(id);
+
+    await prisma.post.delete({
+      where: { id: objectId },
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[POST_DELETE]", error);
-    if (error.code === "P2025") {
-      return NextResponse.json({ message: "Post not found" }, { status: 404 });
-    }
-    return NextResponse.json(
-      { message: "Failed to delete post" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
   }
 }

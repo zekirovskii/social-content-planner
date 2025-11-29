@@ -13,6 +13,8 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [platformFilter, setPlatformFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const pageSize = 6;
 
   useEffect(() => {
     fetchPosts();
@@ -33,10 +35,21 @@ export default function Home() {
     });
   }, [posts, platformFilter, statusFilter, search]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [platformFilter, statusFilter, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage]);
+
   return (
-    <div className="relative min-h-screen overflow-hidden px-4 py-10 text-slate-50 sm:px-6">
+    <div className="relative min-h-screen overflow-hidden px-4 py-10 text-slate-900 sm:px-6">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-        <header className="flex flex-col gap-3 rounded-3xl border border-blue-200/60 bg-gradient-to-br from-[#1858d6] via-[#1d6fea] to-[#0f3fa8] p-8 sm:p-10 text-white shadow-[0_18px_40px_rgba(37,99,235,0.25)]">
+        <header className="flex flex-col gap-3 rounded-3xl border border-blue-200/40 bg-gradient-to-br from-[#0b1f5a] via-[#0c2f82] to-[#0a1f63] p-8 sm:p-10 text-white shadow-[0_24px_50px_rgba(10,31,90,0.4)]">
           <p className="text-xs uppercase tracking-[0.3em] text-blue-100">
             Social Content Planner
           </p>
@@ -96,16 +109,37 @@ export default function Home() {
               Gönderiler yükleniyor...
             </div>
           ) : filtered.length ? (
-            <div className="grid gap-4">
-              {filtered.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  onUpdate={updatePost}
-                  onDelete={deletePost}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {pageItems.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    onUpdate={updatePost}
+                    onDelete={deletePost}
+                  />
+                ))}
+              </div>
+              <div className="flex items-center justify-center gap-3 pt-4">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow disabled:translate-y-0 disabled:opacity-50"
+                >
+                  Önceki
+                </button>
+                <span className="text-sm text-slate-600">
+                  Sayfa {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow disabled:translate-y-0 disabled:opacity-50"
+                >
+                  Sonraki
+                </button>
+              </div>
+            </>
           ) : (
             <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
               Henüz içerik yok. Filtreyi temizle veya yeni bir içerik ekle.
